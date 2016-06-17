@@ -32,6 +32,19 @@ class LoginLineEdit(QtGui.QLineEdit):
     def keyReleaseEvent(self, event):
         self.outerclass.end_time = np.append(self.outerclass.end_time, time.time())
         if event.key() == QtCore.Qt.Key_Return:
+            usr = None
+            usr_name = self.user_line_edit.displayText()
+            pwd = self.text()
+            print "Password", pwd
+            with open('./profiles/' + usr_name + '.bin', 'r') as filename:
+                usr = cp.load(filename)
+
+            if usr.password != pwd:
+                self.label.setText("Incorrect Username or Password.")
+                sleep(3)
+                self.outerclass.reset()
+                return
+
             self.outerclass.timing_vector = np.empty((0,), dtype=np.float64)
             i = 0
             # print self.outerclass.end_time.size
@@ -45,17 +58,14 @@ class LoginLineEdit(QtGui.QLineEdit):
             print "TV", self.outerclass.timing_vector
 
             sys.stdout.flush()
-            usr_name = self.user_line_edit.displayText()
-            usr = None
 
-            with open('./profiles/' + usr_name + '.bin', 'r') as filename:
-                usr = cp.load(filename)
             # print usr.tv_list
             # sleep(15)
+
             curr_timing_vector = self.outerclass.timing_vector
             anomaly_score = usr.detector.anomaly_score(curr_timing_vector)
             print anomaly_score * 1000.0
-            if anomaly_score * 1000.0 > 4:
+            if anomaly_score * 1000.0 > 8:
                 self.label.setText("Processing...")
                 gmail_user = "aayushigupta.noida@gmail.com"
                 gmail_pwd = "123456@abcdef"
@@ -74,8 +84,9 @@ class LoginLineEdit(QtGui.QLineEdit):
 
                 server.sendmail(gmail_user, [TO], BODY)
                 print 'email sent'
-                while True:
-                    pass
+                sleep(5)
+            else:
+                self.label.setText("Login Successful!!")
             # self.outerclass.tv_list.append(np.array(self.outerclass.timing_vector))
             # self.outerclass.start_time = np.empty((0,), dtype=np.float64)
             # self.outerclass.end_time = np.empty((0,), dtype=np.float64)
@@ -102,22 +113,26 @@ class MyLineEdit(QtGui.QLineEdit):
     def keyReleaseEvent(self, event):
         self.outerclass.end_time = np.append(self.outerclass.end_time, time.time())
         if event.key() == QtCore.Qt.Key_Return:
-            self.outerclass.timing_vector = np.empty((0,), dtype=np.float64)
-            i = 0
-            # print self.outerclass.end_time.size
-            while i < self.outerclass.end_time.size - 1:
+            if self.text() == self.outerclass.pwd:
+                self.outerclass.timing_vector = np.empty((0,), dtype=np.float64)
+                i = 0
+                # print self.outerclass.end_time.size
+                while i < self.outerclass.end_time.size - 1:
+                    self.outerclass.timing_vector = np.append(self.outerclass.timing_vector, self.outerclass.start_time[i] - self.outerclass.end_time[i])
+                    self.outerclass.timing_vector = np.append(self.outerclass.timing_vector, self.outerclass.end_time[i+1] - self.outerclass.start_time[i])
+                    i += 1
                 self.outerclass.timing_vector = np.append(self.outerclass.timing_vector, self.outerclass.start_time[i] - self.outerclass.end_time[i])
-                self.outerclass.timing_vector = np.append(self.outerclass.timing_vector, self.outerclass.end_time[i+1] - self.outerclass.start_time[i])
-                i += 1
-            self.outerclass.timing_vector = np.append(self.outerclass.timing_vector, self.outerclass.start_time[i] - self.outerclass.end_time[i])
-            print self.outerclass.start_time
-            print self.outerclass.end_time
-            print self.outerclass.timing_vector
-            self.outerclass.tv_list.append(np.array(self.outerclass.timing_vector))
-            self.outerclass.start_time = np.empty((0,), dtype=np.float64)
-            self.outerclass.end_time = np.empty((0,), dtype=np.float64)
-            self.outerclass.timing_vector = np.empty((0,), dtype=np.float64)
-            self.clear()
+                print self.outerclass.start_time
+                print self.outerclass.end_time
+                print self.outerclass.timing_vector
+                self.outerclass.tv_list.append(np.array(self.outerclass.timing_vector))
+                self.outerclass.start_time = np.empty((0,), dtype=np.float64)
+                self.outerclass.end_time = np.empty((0,), dtype=np.float64)
+                self.outerclass.timing_vector = np.empty((0,), dtype=np.float64)
+                self.clear()
+            else:
+                self.outerclass.end_time = np.empty((0,), dtype=np.float64)
+                self.clear()
         # print "Key released"
         QtGui.QLineEdit.keyReleaseEvent(self, event)
 
@@ -168,7 +183,7 @@ class RegisterWindow(QtGui.QMainWindow, register.Ui_MainWindow):
             print "Length should be atleast 8"
         elif self.pwd_line_edit.text() != self.re_enter_pwd_line_edit.text():
             print "Please enter the same passwords"
-        usr_name = self.usr_line_edit.displayText()
+        usr_name = str(self.usr_line_edit.displayText())
         pwd = self.pwd_line_edit.text()
         print pwd
         email = str(self.re_enter_pwd_line_edit_2.displayText())

@@ -18,4 +18,3 @@ class NNMDetector:
             mlnbs_dists.append(mlnbs_dist(timing_vector, test_vector, self.cov_mat))
 
         return min(mlnbs_dists)
-
