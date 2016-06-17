@@ -33,6 +33,7 @@ class Ui_MainWindow(object):
         self.pwd_label.setObjectName(_fromUtf8("pwd_label"))
         self.pwd_line_edit = QtGui.QLineEdit(self.centralwidget)
         self.pwd_line_edit.setGeometry(QtCore.QRect(200, 140, 181, 21))
+        self.pwd_line_edit.setText(_fromUtf8(""))
         self.pwd_line_edit.setEchoMode(QtGui.QLineEdit.Password)
         self.pwd_line_edit.setObjectName(_fromUtf8("pwd_line_edit"))
         self.finish_button = QtGui.QPushButton(self.centralwidget)

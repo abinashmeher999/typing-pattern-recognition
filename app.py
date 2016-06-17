@@ -13,13 +13,14 @@ from time import sleep
 
 
 class LoginLineEdit(QtGui.QLineEdit):
-    def __init__(self, usr_line_edit, parent=None, outerclass=None):
+    def __init__(self, usr_line_edit, label, parent=None, outerclass=None):
         super(LoginLineEdit, self).__init__(parent)
         self.outerclass = outerclass
         self.outerclass.start_time = np.empty((0,), dtype=np.float64)
         self.outerclass.end_time = np.empty((0,), dtype=np.float64)
         self.outerclass.timing_vector = np.empty((0,), dtype=np.float64)
         self.user_line_edit = usr_line_edit
+        self.label = label
 
     def keyPressEvent(self, event):
         self.outerclass.start_time = np.append(self.outerclass.start_time, time.time())
@@ -55,8 +56,9 @@ class LoginLineEdit(QtGui.QLineEdit):
             anomaly_score = usr.detector.anomaly_score(curr_timing_vector)
             print anomaly_score * 1000.0
             if anomaly_score * 1000.0 > 4:
+                self.label.setText("Processing...")
                 gmail_user = "aayushigupta.noida@gmail.com"
-                gmail_pwd = ""
+                gmail_pwd = "123456@abcdef"
 
                 TO = "abinashdakshana999@gmail.com"
                 SUBJECT = "Unauthorised Access detected"
@@ -72,6 +74,8 @@ class LoginLineEdit(QtGui.QLineEdit):
 
                 server.sendmail(gmail_user, [TO], BODY)
                 print 'email sent'
+                while True:
+                    pass
             # self.outerclass.tv_list.append(np.array(self.outerclass.timing_vector))
             # self.outerclass.start_time = np.empty((0,), dtype=np.float64)
             # self.outerclass.end_time = np.empty((0,), dtype=np.float64)
@@ -167,7 +171,7 @@ class RegisterWindow(QtGui.QMainWindow, register.Ui_MainWindow):
         usr_name = self.usr_line_edit.displayText()
         pwd = self.pwd_line_edit.text()
         print pwd
-        email = None
+        email = str(self.re_enter_pwd_line_edit_2.displayText())
         window = TrainDataWindow(usr_name, pwd, email, self)
         window.show()
         self.close()
@@ -179,9 +183,15 @@ class LoginScreen(QtGui.QMainWindow, login.Ui_MainWindow):
         self.setupUi(self)
         self.register_button.clicked.connect(self.handleRegisterButton)
         # self.login_button.clicked.connect(self.handleLoginButton)
-        self.pwd_line_edit = LoginLineEdit(self.usr_line_edit, self.pwd_line_edit, self)
+        self.pwd_line_edit = LoginLineEdit(self.usr_line_edit, self.message_label, self.pwd_line_edit, self)
         # self.pwd_line_edit.returnPressed.connect(self.login_button.click)
         # self.login_button.clicked.connect(self.handleLoginButton)
+        self.reset_button.clicked.connect(self.reset)
+
+    def reset(self):
+        form = LoginScreen()
+        form.show()
+        self.close()
 
     def handleRegisterButton(self):
         window = RegisterWindow(self)
